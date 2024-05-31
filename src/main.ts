@@ -44,7 +44,7 @@ const getBearerToken = async () => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-    }
+    },
   )
 
   cachedToken = response.data.access_token
@@ -70,21 +70,22 @@ fastify.post(
   async (request: any, reply) => {
     try {
       const bearerToken = await getBearerToken()
+      const headers = {
+        Authorization: `Bearer ${bearerToken}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      }
       const response = await axios.post(PROSPECT_LEAD_API_URL, request.body, {
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
       })
       reply.send(response.data)
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         cachedToken = null
       }
-
       reply.code(502).send({ error: 'Failed to process the request' })
     }
-  }
+  },
 )
 
 fastify.listen({ port: +PORT, host: '0.0.0.0' }, (err) => {
